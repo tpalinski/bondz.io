@@ -146,32 +146,19 @@ export default class Bondzio {
         }
     }
 
-    public async check(roomId: string){
-        
+    public async check(roomId: string): Promise<boolean>{
+        let res = await fetch(Bondzio.SERVER_URL + `room?id=${roomId}`, {
+            method: 'GET'
+        })
+        if(res.status === 200){
+            let body = await res.json()
+            return body
+        } else {
+            throw new BondzioServerError("Error searching for room: this should never happen")
+        }
     }
 
 }
 
-let bondzio = new Bondzio()
-
-
-bondzio.eat({
-    roomName: 'tymektestusun',
-    password: '1234',
-    action: BondzioAction.Register
-}).then(res => {
-    bondzio.delete().then(res =>{
-        console.log("Complete - room creatted and deleted!")
-        console.log(bondzio.state)
-    })
-
-}).catch(error => {
-    console.log(error)
-})
-
-
-
-
-console.log(bondzio.state)
 
 
