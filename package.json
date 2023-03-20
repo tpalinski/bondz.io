@@ -1,0 +1,22 @@
+{
+  "name": "bondz.io",
+  "version": "1.0.0",
+  "description": "Interface for interacting with Bondzio ecosystem",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tpalinski/bondz.io.git"
+  },
+  "author": "Tymoteusz Paliński",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tpalinski/bondz.io/issues"
+  },
+  "homepage": "https://github.com/tpalinski/bondz.io#readme",
+  "devDependencies": {
+    "typescript": "^5.0.2"
+  }
+}
