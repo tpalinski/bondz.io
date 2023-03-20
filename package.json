@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "Interface for interacting with Bondzio ecosystem",
   "main": "lib/index.js",
+  "types": "lib/types.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node lib/index.js",
+    "dev": "concurrently \"tsc -w\" \"nodemon lib/index.js\""
   },
   "repository": {
     "type": "git",
@@ -17,6 +20,9 @@
   },
   "homepage": "https://github.com/tpalinski/bondz.io#readme",
   "devDependencies": {
+    "@types/node": "^18.15.3",
+    "concurrently": "^7.6.0",
+    "nodemon": "^2.0.21",
     "typescript": "^5.0.2"
   }
 }
