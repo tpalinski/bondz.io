@@ -1,4 +1,4 @@
-import { BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
+import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
 import { roomParser } from "./roomParser";
 
 // Types
@@ -9,18 +9,14 @@ export interface BondzioFood {
     // Password, provided by the user
     password: string,
     // Action to be performed
-    action: MajorBondzioAction | MinorBondzioAction
+    action: BondzioAction
 }
 
-export enum MajorBondzioAction{
+export enum BondzioAction{
     Login = 0,
     Register = 1,
 }
 
-export enum MinorBondzioAction{
-    Delete = 2,
-    Check = 3
-}
 
 export interface Room {
     roomId: string,
@@ -58,10 +54,24 @@ export default class Bondzio {
         this.status.roomId = food.roomName
         this.status.password = food.password
         switch(food.action){
-            case MajorBondzioAction.Login:
-                let res = await this.login()
-                this.status.isValid = true 
-                return res 
+            case BondzioAction.Login:
+                try {
+                    var res = await this.login()
+                    this.status.isValid = true 
+                    return res 
+                } catch(e){
+                    throw e;
+                }
+                
+            case BondzioAction.Register:
+                try{
+                    var res = await this.register()
+                    this.status.isValid = true
+                    return res
+                } catch (e) {
+                    throw e
+                }
+
         }
         return null;
     }
@@ -94,18 +104,74 @@ export default class Bondzio {
         }
     }
 
+    private async register(): Promise<Room>{
+        let res = await fetch(Bondzio.SERVER_URL + `create?id=${this.status.roomId}&password=${this.status.password}`, {
+            method: 'POST'
+        })
+        if(res.status === 201){
+            let body = await res.json();
+            let room = roomParser(body)
+            if(room != null){
+                this.status.roomKey = room.roomKey
+                return room;
+            } else {
+                throw new BondzioServerError("Error while registering: cant parse room")
+            }
+        } else if(res.status === 409) {
+            throw new BondzioRoomAlreadyExistsError("Error while registering: room already exists")
+        } else if(res.status === 500){
+            throw new BondzioServerError("Error while registering: internal server error")
+        } else {
+            throw new BondzioServerError("Error while registering: that should not be happening right now")
+        }
+    }
+
+    public async delete() {
+        this.status.isValid = false
+        let res = await fetch(Bondzio.SERVER_URL + `delete?id=${this.status.roomId}`, {
+            method: 'POST'
+        })
+        if(res.status === 200){
+            this.status = {
+                roomId: "",
+                roomKey: "",
+                password: "",
+                isValid: true
+            }
+            return
+        } else if (res.status === 500){
+            throw new BondzioServerError("Error while deleting: server error")
+        } else {
+            throw new BondzioServerError("Error while deleting: this should never happen")
+        }
+    }
+
+    public async check(roomId: string){
+        
+    }
+
 }
 
 let bondzio = new Bondzio()
 
+
 bondzio.eat({
-    roomName: 'tymektest',
+    roomName: 'tymektestusun',
     password: '1234',
-    action: MajorBondzioAction.Login
+    action: BondzioAction.Register
 }).then(res => {
-    console.log(res)
-    console.log(bondzio.state)
+    bondzio.delete().then(res =>{
+        console.log("Complete - room creatted and deleted!")
+        console.log(bondzio.state)
+    })
+
+}).catch(error => {
+    console.log(error)
 })
+
+
+
+
 console.log(bondzio.state)
 
 
