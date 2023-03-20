@@ -10,7 +10,7 @@ export const roomParser = (responseBody: Object): Room | null => {
                 return {
                     roomId: roomObj.roomID,
                     roomKey: roomObj.roomKey,
-                    password: roomObj.password
+                    password: roomObj.roomPassword
                 }
         }
         return null;

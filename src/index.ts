@@ -27,13 +27,22 @@ export interface Room {
     password: string,
     roomKey: string
 }
+
+export interface BondzioStatus extends Room {
+    // Flag indicating whether the status is not being altered
+    isValid: boolean
+}
+
 export default class Bondzio {
 
     private static SERVER_URL = "https://bondzioshed.bieda.it/";
 
-    private roomId: string = ""
-    private password: string = ""
-    private roomKey: string =  ""
+    private status: BondzioStatus = {
+        roomId: "",
+        password: "",
+        roomKey: "",
+        isValid: true
+    }
 
     constructor() {
         fetch(Bondzio.SERVER_URL)
@@ -45,20 +54,33 @@ export default class Bondzio {
     }
 
     public async eat(food: BondzioFood): Promise<Room | null> {
-        this.roomId = food.roomName
-        this.password = food.password
-        await this.login()
+        this.status.isValid = false;
+        this.status.roomId = food.roomName
+        this.status.password = food.password
+        switch(food.action){
+            case MajorBondzioAction.Login:
+                let res = await this.login()
+                this.status.isValid = true 
+                return res 
+        }
         return null;
     }
 
+    
+    public get state() : BondzioStatus {
+        return this.status
+    }
+    
+
     private async login(): Promise<Room>{
-       let res = await fetch(Bondzio.SERVER_URL + `login?id=${this.roomId}&password=${this.password}`, {
+       let res = await fetch(Bondzio.SERVER_URL + `login?id=${this.status.roomId}&password=${this.status.password}`, {
             method: 'POST'
         })
         if(res.status === 200){
             let body = await res.json();
             let room = roomParser(body)
             if(room != null){
+                this.status.roomKey = room.roomKey
                 return room;
             } else {
                 throw new BondzioServerError("Error while logging in: cant parse room")
@@ -80,6 +102,10 @@ bondzio.eat({
     roomName: 'tymektest',
     password: '1234',
     action: MajorBondzioAction.Login
+}).then(res => {
+    console.log(res)
+    console.log(bondzio.state)
 })
+console.log(bondzio.state)
 
 
