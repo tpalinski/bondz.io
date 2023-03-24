@@ -25,5 +25,8 @@
     "concurrently": "^7.6.0",
     "nodemon": "^2.0.21",
     "typescript": "^5.0.2"
+  },
+  "dependencies": {
+    "socket.io": "^4.6.1"
   }
 }
