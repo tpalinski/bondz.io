@@ -41,13 +41,18 @@ export default class Bondzio {
         isValid: true
     }
 
+    private io; 
+
     constructor() {
+        this.io = io(Bondzio.SOCKET_URL);  
+        console.log("Connecting to the ws server...")
         fetch(Bondzio.SERVER_URL)
             .then(res => {
                 if(res.status != 200){
                     throw new BondzioServerNotFoundError("Error while creating Bondzio: no server connection could be established")
                 }
             });
+        this.socketSetup();
     }
 
     public async eat(food: BondzioFood): Promise<Room | null> {
@@ -159,7 +164,33 @@ export default class Bondzio {
         }
     }
 
+    public connect(){
+        this.io.emit("join-room", {
+            room: this.state.roomKey,
+            nickname: "Test nickname"
+        })
+    }
+
+    // Websocket logic
+    public socketSetup(){
+
+        this.io.on("connected", (msg: string) => {
+            console.log(msg);
+        })
+
+        this.io.on("room-confirm", (msg: string) => {
+            console.log(msg)
+        })
+    }
+
 }
 
-
-
+// Only for dev purposes
+let bd = new Bondzio();
+bd.eat({
+    roomName: 'tymektest',
+    password: '1234',
+    action: BondzioAction.Login
+}).then(room => {
+        bd.connect();
+    })
