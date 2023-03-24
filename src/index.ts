@@ -1,5 +1,6 @@
 import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
 import { roomParser } from "./roomParser";
+import {io} from 'socket.io-client';
 
 // Types
 
@@ -32,7 +33,7 @@ export interface BondzioStatus extends Room {
 export default class Bondzio {
 
     private static SERVER_URL = "https://bondzioshed.bieda.it/";
-
+    private static SOCKET_URL = "ws://localhost:3001";
     private status: BondzioStatus = {
         roomId: "",
         password: "",
