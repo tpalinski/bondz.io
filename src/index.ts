@@ -30,6 +30,12 @@ export interface BondzioStatus extends Room {
     isValid: boolean
 }
 
+export interface Message {
+    nickname: string,
+    content: string
+}
+
+
 export default class Bondzio {
 
     private static SERVER_URL = "https://bondzioshed.bieda.it/";
@@ -42,6 +48,7 @@ export default class Bondzio {
     }
 
     private io; 
+    private nickname: string = "";
 
     constructor() {
         this.io = io(Bondzio.SOCKET_URL);  
@@ -164,11 +171,13 @@ export default class Bondzio {
         }
     }
 
-    public connect(){
+    public connect(nickname: string){
+        this.nickname = nickname;
         this.io.emit("join-room", {
             room: this.state.roomKey,
-            nickname: "Test nickname"
+            nickname: nickname
         })
+
     }
 
     // Websocket logic
@@ -181,6 +190,17 @@ export default class Bondzio {
         this.io.on("room-confirm", (msg: string) => {
             console.log(msg)
         })
+
+        this.io.on("receive-message", (msg: Message) => {
+            console.log(`${msg.nickname} says: ${msg.content}`)
+        })
+    }
+
+    public sendMessage(message: string){
+        this.io.emit("send-message", {
+            nickname: this.nickname,
+            content: message
+        })
     }
 
 }
@@ -192,5 +212,8 @@ bd.eat({
     password: '1234',
     action: BondzioAction.Login
 }).then(room => {
-        bd.connect();
+        bd.connect("Bondzio to kotek");
+        setTimeout(() => {
+            bd.sendMessage("meow")
+        }, 1000)
     })
