@@ -1,5 +1,6 @@
 import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
 import { roomParser } from "./roomParser";
+import {io} from 'socket.io-client';
 
 // Types
 
@@ -29,10 +30,20 @@ export interface BondzioStatus extends Room {
     isValid: boolean
 }
 
+export interface Message {
+    nickname: string,
+    content: string
+}
+
+export interface DrawCoords {
+    x: number,
+    y: number
+}
+
 export default class Bondzio {
 
     private static SERVER_URL = "https://bondzioshed.bieda.it/";
-
+    private static SOCKET_URL = "https://bondziodraw.bieda.it";
     private status: BondzioStatus = {
         roomId: "",
         password: "",
@@ -40,13 +51,19 @@ export default class Bondzio {
         isValid: true
     }
 
+    private io; 
+    private nickname: string = "";
+
     constructor() {
+        this.io = io(Bondzio.SOCKET_URL);  
+        console.log("Connecting to the ws server...")
         fetch(Bondzio.SERVER_URL)
             .then(res => {
                 if(res.status != 200){
                     throw new BondzioServerNotFoundError("Error while creating Bondzio: no server connection could be established")
                 }
             });
+        this.socketSetup();
     }
 
     public async eat(food: BondzioFood): Promise<Room | null> {
@@ -158,7 +175,64 @@ export default class Bondzio {
         }
     }
 
+    public connect(nickname: string){
+        this.nickname = nickname;
+        this.io.emit("join-room", {
+            room: this.state.roomKey,
+            nickname: nickname
+        })
+
+    }
+
+    // Websocket logic
+    public socketSetup(){
+
+        this.io.on("connected", (msg: string) => {
+            console.log(msg);
+        })
+
+        this.io.on("room-confirm", (msg: string) => {
+            console.log(msg)
+        })
+
+        this.io.on("receive-message", (msg: Message) => {
+            console.log(`${msg.nickname} says: ${msg.content}`)
+        })
+
+        this.io.on("receive-draw", (msg) => {
+            console.log(msg)
+        })
+
+        this.io.on("correct-guess", () => {
+            console.log("Guessed correctly")
+        })
+
+        this.io.on("new-word", (word: string) => {
+            console.log("Your word is: " + word)
+        })
+
+        this.io.on("opponent-guessed", (nickname: string) => {
+            console.log(`Opponenet: ${nickname} guessed the word!`)
+        })
+    }
+
+    public sendMessage(message: string){
+        this.io.emit("send-message", {
+            nickname: this.nickname,
+            content: message
+        })
+    }
+
+    public sendDraw(coords: DrawCoords) {
+        this.io.emit("send-draw", coords)
+    }
+
+    public guess(word: string) {
+        this.io.emit("guess", word)
+    }
+
+    public getNewWord(category: string){
+        this.io.emit("generate-new-word", category);
+    }
 }
-
-
 
