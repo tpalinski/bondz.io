@@ -236,16 +236,3 @@ export default class Bondzio {
     }
 }
 
-// Only for dev purposes
-let bd = new Bondzio();
-bd.eat({
-    roomName: 'tymektest',
-    password: '1234',
-    action: BondzioAction.Login
-}).then(room => {
-        bd.connect("Bondzio to kotek");
-        setTimeout(() => {
-            bd.sendMessage("meow")
-            bd.sendDraw({x: 100, y:100})
-        }, 1000)
-    })
