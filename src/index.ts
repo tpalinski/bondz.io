@@ -43,7 +43,7 @@ export interface DrawCoords {
 export default class Bondzio {
 
     private static SERVER_URL = "https://bondzioshed.bieda.it/";
-    private static SOCKET_URL = "ws://localhost:3001";
+    private static SOCKET_URL = "https://bondziodraw.bieda.it";
     private status: BondzioStatus = {
         roomId: "",
         password: "",
