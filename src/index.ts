@@ -35,6 +35,10 @@ export interface Message {
     content: string
 }
 
+export interface DrawCoords {
+    x: number,
+    y: number
+}
 
 export default class Bondzio {
 
@@ -194,6 +198,22 @@ export default class Bondzio {
         this.io.on("receive-message", (msg: Message) => {
             console.log(`${msg.nickname} says: ${msg.content}`)
         })
+
+        this.io.on("receive-draw", (msg) => {
+            console.log(msg)
+        })
+
+        this.io.on("correct-guess", () => {
+            console.log("Guessed correctly")
+        })
+
+        this.io.on("new-word", (word: string) => {
+            console.log("Your word is: " + word)
+        })
+
+        this.io.on("opponent-guessed", (nickname: string) => {
+            console.log(`Opponenet: ${nickname} guessed the word!`)
+        })
     }
 
     public sendMessage(message: string){
@@ -203,6 +223,17 @@ export default class Bondzio {
         })
     }
 
+    public sendDraw(coords: DrawCoords) {
+        this.io.emit("send-draw", coords)
+    }
+
+    public guess(word: string) {
+        this.io.emit("guess", word)
+    }
+
+    public getNewWord(category: string){
+        this.io.emit("generate-new-word", category);
+    }
 }
 
 // Only for dev purposes
@@ -215,5 +246,6 @@ bd.eat({
         bd.connect("Bondzio to kotek");
         setTimeout(() => {
             bd.sendMessage("meow")
+            bd.sendDraw({x: 100, y:100})
         }, 1000)
     })
