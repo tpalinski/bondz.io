@@ -1,7 +1,7 @@
 import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
 import { roomParser } from "./roomParser";
 import {io} from 'socket.io-client';
-import {BondzioFood, BondzioStatus, DrawCoords, BondzioAction, Room, Message } from './types'
+import {BondzioFood, BondzioStatus, DrawCoords, BondzioAction, Room, Message, BondzioSocketCallbacks } from './types'
 // Types
 
 
@@ -150,7 +150,15 @@ export default class Bondzio {
     }
 
     // Websocket logic
-    public socketSetup(){
+    public socketSetup(callbacks: BondzioSocketCallbacks = {
+        onDraw: (arg) => console.log(arg),
+        onConnect: (arg) => console.log(arg),
+        onNewWord: (arg) => console.log(arg),
+        onChatMessage: (arg) => console.log(arg), 
+        onRoomConfirm: (arg) => console.log(arg),
+        onCorrectGuess: () => console.log("Guessed correctly"),
+        onOpponentGuess:(arg) => console.log(arg)
+    }){
 
         this.io.on("connected", (msg: string) => {
             console.log(msg);

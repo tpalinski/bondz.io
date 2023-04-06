@@ -1,5 +1,3 @@
-
-
 export interface BondzioFood {
     // Name of the room, provided by client
     roomName: string,
@@ -34,4 +32,14 @@ export interface Message {
 export interface DrawCoords {
     x: number,
     y: number
+}
+
+export interface BondzioSocketCallbacks {
+    onConnect: (connectMessage: string) => void,
+    onRoomConfirm: (confirmMessage: string) => void,
+    onChatMessage: (chatMessage: string) => void,
+    onDraw: (coords: DrawCoords) => void,
+    onCorrectGuess: () => void,
+    onOpponentGuess: (opponent: string) => void,
+    onNewWord: (word: string) => void
 }
