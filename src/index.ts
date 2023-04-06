@@ -55,7 +55,6 @@ export default class Bondzio {
                 }
 
         }
-        return null;
     }
 
     
@@ -161,31 +160,31 @@ export default class Bondzio {
     }){
 
         this.io.on("connected", (msg: string) => {
-            console.log(msg);
+            callbacks.onConnect(msg)
         })
 
         this.io.on("room-confirm", (msg: string) => {
-            console.log(msg)
+            callbacks.onRoomConfirm(msg)
         })
 
         this.io.on("receive-message", (msg: Message) => {
-            console.log(`${msg.nickname} says: ${msg.content}`)
+            callbacks.onChatMessage(msg)
         })
 
         this.io.on("receive-draw", (msg: DrawCoords) => {
-            console.log(msg)
+            callbacks.onDraw(msg)
         })
 
         this.io.on("correct-guess", () => {
-            console.log("Guessed correctly")
+            callbacks.onCorrectGuess()
         })
 
         this.io.on("new-word", (word: string) => {
-            console.log("Your word is: " + word)
+            callbacks.onNewWord(word)
         })
 
         this.io.on("opponent-guessed", (nickname: string) => {
-            console.log(`Opponenet: ${nickname} guessed the word!`)
+            callbacks.onOpponentGuess(nickname)
         })
     }
 

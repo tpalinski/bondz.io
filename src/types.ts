@@ -37,7 +37,7 @@ export interface DrawCoords {
 export interface BondzioSocketCallbacks {
     onConnect: (connectMessage: string) => void,
     onRoomConfirm: (confirmMessage: string) => void,
-    onChatMessage: (chatMessage: string) => void,
+    onChatMessage: (chatMessage: Message) => void,
     onDraw: (coords: DrawCoords) => void,
     onCorrectGuess: () => void,
     onOpponentGuess: (opponent: string) => void,
