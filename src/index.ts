@@ -2,6 +2,7 @@ import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerE
 import { roomParser } from "./roomParser";
 import {io} from 'socket.io-client';
 import {BondzioFood, BondzioStatus, DrawCoords, BondzioAction, Room, Message, BondzioSocketCallbacks } from './types'
+import { BondzioSocketCallbackError } from "./error";
 // Types
 
 
@@ -158,34 +159,38 @@ export default class Bondzio {
         onCorrectGuess: () => console.log("Guessed correctly"),
         onOpponentGuess:(arg) => console.log(arg)
     }){
+        try{
+            this.io.on("connected", (msg: string) => {
+                callbacks.onConnect(msg)
+            })
 
-        this.io.on("connected", (msg: string) => {
-            callbacks.onConnect(msg)
-        })
+            this.io.on("room-confirm", (msg: string) => {
+                callbacks.onRoomConfirm(msg)
+            })
 
-        this.io.on("room-confirm", (msg: string) => {
-            callbacks.onRoomConfirm(msg)
-        })
+            this.io.on("receive-message", (msg: Message) => {
+                callbacks.onChatMessage(msg)
+            })
 
-        this.io.on("receive-message", (msg: Message) => {
-            callbacks.onChatMessage(msg)
-        })
+            this.io.on("receive-draw", (msg: DrawCoords) => {
+                callbacks.onDraw(msg)
+            })
 
-        this.io.on("receive-draw", (msg: DrawCoords) => {
-            callbacks.onDraw(msg)
-        })
+            this.io.on("correct-guess", () => {
+                callbacks.onCorrectGuess()
+            })
 
-        this.io.on("correct-guess", () => {
-            callbacks.onCorrectGuess()
-        })
+            this.io.on("new-word", (word: string) => {
+                callbacks.onNewWord(word)
+            })
 
-        this.io.on("new-word", (word: string) => {
-            callbacks.onNewWord(word)
-        })
-
-        this.io.on("opponent-guessed", (nickname: string) => {
-            callbacks.onOpponentGuess(nickname)
-        })
+            this.io.on("opponent-guessed", (nickname: string) => {
+                callbacks.onOpponentGuess(nickname)
+            })
+        } catch (e) {
+            console.error(e)
+            throw new BondzioSocketCallbackError("Error while processing websocket requests")
+        }
     }
 
     public sendMessage(message: string){
