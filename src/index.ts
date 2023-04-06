@@ -1,44 +1,9 @@
 import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
 import { roomParser } from "./roomParser";
 import {io} from 'socket.io-client';
-
+import {BondzioFood, BondzioStatus, DrawCoords, BondzioAction, Room, Message } from './types'
 // Types
 
-export interface BondzioFood {
-    // Name of the room, provided by client
-    roomName: string,
-    // Password, provided by the user
-    password: string,
-    // Action to be performed
-    action: BondzioAction
-}
-
-export enum BondzioAction{
-    Login = 0,
-    Register = 1,
-}
-
-
-export interface Room {
-    roomId: string,
-    password: string,
-    roomKey: string
-}
-
-export interface BondzioStatus extends Room {
-    // Flag indicating whether the status is not being altered
-    isValid: boolean
-}
-
-export interface Message {
-    nickname: string,
-    content: string
-}
-
-export interface DrawCoords {
-    x: number,
-    y: number
-}
 
 export default class Bondzio {
 
@@ -199,7 +164,7 @@ export default class Bondzio {
             console.log(`${msg.nickname} says: ${msg.content}`)
         })
 
-        this.io.on("receive-draw", (msg) => {
+        this.io.on("receive-draw", (msg: DrawCoords) => {
             console.log(msg)
         })
 

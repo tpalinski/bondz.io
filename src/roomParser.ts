@@ -1,4 +1,4 @@
-import { Room } from ".";
+import { Room } from "./types";
 
 export const roomParser = (responseBody: Object): Room | null => {
     if(responseBody.hasOwnProperty("room")){

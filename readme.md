@@ -39,6 +39,10 @@ Perform operation specified by ```food``` and return ```Room```:
 
 ```ts
 async function Bondzio.eat(food: BondzioFood): Promise<Room>   
+throws {
+    BondzioServerError,
+    
+}
 ```
 
 Return current state of Bondzio object:
@@ -88,6 +92,40 @@ enum BondzioAction{
 ```
 
 An enum representing complex actions that can be scheduled for Bondzio to perform
+
+
+#### Errors
+
+```ts  
+class BondzioServerNotFoundError extends Error {}
+```
+
+An error indicating that Bondzio could no establish connection to the server
+
+```ts  
+class BondzioWrongPasswordError extends Error {}
+```
+
+An error indicating that user submitted wrong password while logging in
+
+```ts  
+class BondzioRoomNotFoundError extends Error {}
+```
+
+An error indicating that user submitted wrong roomId while logging in
+
+```ts  
+class BondzioServerError extends Error {}
+```
+
+An error indicating that internal server error occured
+
+```ts  
+class BondzioRoomAlreadyExistsError extends Error {}
+```
+
+An error indicating that registered room already exists
+
 
 ### Collaborate
 
