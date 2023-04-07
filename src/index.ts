@@ -1,44 +1,10 @@
 import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
 import { roomParser } from "./roomParser";
 import {io} from 'socket.io-client';
-
+import {BondzioFood, BondzioStatus, DrawCoords, BondzioAction, Room, Message, BondzioSocketCallbacks } from './types'
+import { BondzioSocketCallbackError } from "./error";
 // Types
 
-export interface BondzioFood {
-    // Name of the room, provided by client
-    roomName: string,
-    // Password, provided by the user
-    password: string,
-    // Action to be performed
-    action: BondzioAction
-}
-
-export enum BondzioAction{
-    Login = 0,
-    Register = 1,
-}
-
-
-export interface Room {
-    roomId: string,
-    password: string,
-    roomKey: string
-}
-
-export interface BondzioStatus extends Room {
-    // Flag indicating whether the status is not being altered
-    isValid: boolean
-}
-
-export interface Message {
-    nickname: string,
-    content: string
-}
-
-export interface DrawCoords {
-    x: number,
-    y: number
-}
 
 export default class Bondzio {
 
@@ -90,7 +56,6 @@ export default class Bondzio {
                 }
 
         }
-        return null;
     }
 
     
@@ -185,35 +150,47 @@ export default class Bondzio {
     }
 
     // Websocket logic
-    public socketSetup(){
+    public socketSetup(callbacks: BondzioSocketCallbacks = {
+        onDraw: (arg) => console.log(arg),
+        onConnect: (arg) => console.log(arg),
+        onNewWord: (arg) => console.log(arg),
+        onChatMessage: (arg) => console.log(arg), 
+        onRoomConfirm: (arg) => console.log(arg),
+        onCorrectGuess: () => console.log("Guessed correctly"),
+        onOpponentGuess:(arg) => console.log(arg)
+    }){
+        try{
+            this.io.on("connected", (msg: string) => {
+                callbacks.onConnect(msg)
+            })
 
-        this.io.on("connected", (msg: string) => {
-            console.log(msg);
-        })
+            this.io.on("room-confirm", (msg: string) => {
+                callbacks.onRoomConfirm(msg)
+            })
 
-        this.io.on("room-confirm", (msg: string) => {
-            console.log(msg)
-        })
+            this.io.on("receive-message", (msg: Message) => {
+                callbacks.onChatMessage(msg)
+            })
 
-        this.io.on("receive-message", (msg: Message) => {
-            console.log(`${msg.nickname} says: ${msg.content}`)
-        })
+            this.io.on("receive-draw", (msg: DrawCoords) => {
+                callbacks.onDraw(msg)
+            })
 
-        this.io.on("receive-draw", (msg) => {
-            console.log(msg)
-        })
+            this.io.on("correct-guess", () => {
+                callbacks.onCorrectGuess()
+            })
 
-        this.io.on("correct-guess", () => {
-            console.log("Guessed correctly")
-        })
+            this.io.on("new-word", (word: string) => {
+                callbacks.onNewWord(word)
+            })
 
-        this.io.on("new-word", (word: string) => {
-            console.log("Your word is: " + word)
-        })
-
-        this.io.on("opponent-guessed", (nickname: string) => {
-            console.log(`Opponenet: ${nickname} guessed the word!`)
-        })
+            this.io.on("opponent-guessed", (nickname: string) => {
+                callbacks.onOpponentGuess(nickname)
+            })
+        } catch (e) {
+            console.error(e)
+            throw new BondzioSocketCallbackError("Error while processing websocket requests")
+        }
     }
 
     public sendMessage(message: string){
