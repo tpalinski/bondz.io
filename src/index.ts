@@ -1,38 +1,15 @@
 import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
 import { roomParser } from "./roomParser";
-
+import {io} from 'socket.io-client';
+import {BondzioFood, BondzioStatus, DrawCoords, BondzioAction, Room, Message, BondzioSocketCallbacks } from './types'
+import { BondzioSocketCallbackError } from "./error";
 // Types
 
-export interface BondzioFood {
-    // Name of the room, provided by client
-    roomName: string,
-    // Password, provided by the user
-    password: string,
-    // Action to be performed
-    action: BondzioAction
-}
-
-export enum BondzioAction{
-    Login = 0,
-    Register = 1,
-}
-
-
-export interface Room {
-    roomId: string,
-    password: string,
-    roomKey: string
-}
-
-export interface BondzioStatus extends Room {
-    // Flag indicating whether the status is not being altered
-    isValid: boolean
-}
 
 export default class Bondzio {
 
     private static SERVER_URL = "https://bondzioshed.bieda.it/";
-
+    private static SOCKET_URL = "https://bondziodraw.bieda.it";
     private status: BondzioStatus = {
         roomId: "",
         password: "",
@@ -40,13 +17,19 @@ export default class Bondzio {
         isValid: true
     }
 
+    private io; 
+    private nickname: string = "";
+
     constructor() {
+        this.io = io(Bondzio.SOCKET_URL);  
+        console.log("Connecting to the ws server...")
         fetch(Bondzio.SERVER_URL)
             .then(res => {
                 if(res.status != 200){
                     throw new BondzioServerNotFoundError("Error while creating Bondzio: no server connection could be established")
                 }
             });
+        this.socketSetup();
     }
 
     public async eat(food: BondzioFood): Promise<Room | null> {
@@ -73,7 +56,6 @@ export default class Bondzio {
                 }
 
         }
-        return null;
     }
 
     
@@ -158,7 +140,76 @@ export default class Bondzio {
         }
     }
 
+    public connect(nickname: string){
+        this.nickname = nickname;
+        this.io.emit("join-room", {
+            room: this.state.roomKey,
+            nickname: nickname
+        })
+
+    }
+
+    // Websocket logic
+    public socketSetup(callbacks: BondzioSocketCallbacks = {
+        onDraw: (arg) => console.log(arg),
+        onConnect: (arg) => console.log(arg),
+        onNewWord: (arg) => console.log(arg),
+        onChatMessage: (arg) => console.log(arg), 
+        onRoomConfirm: (arg) => console.log(arg),
+        onCorrectGuess: () => console.log("Guessed correctly"),
+        onOpponentGuess:(arg) => console.log(arg)
+    }){
+        try{
+            this.io.on("connected", (msg: string) => {
+                callbacks.onConnect(msg)
+            })
+
+            this.io.on("room-confirm", (msg: string) => {
+                callbacks.onRoomConfirm(msg)
+            })
+
+            this.io.on("receive-message", (msg: Message) => {
+                callbacks.onChatMessage(msg)
+            })
+
+            this.io.on("receive-draw", (msg: DrawCoords) => {
+                callbacks.onDraw(msg)
+            })
+
+            this.io.on("correct-guess", () => {
+                callbacks.onCorrectGuess()
+            })
+
+            this.io.on("new-word", (word: string) => {
+                callbacks.onNewWord(word)
+            })
+
+            this.io.on("opponent-guessed", (nickname: string) => {
+                callbacks.onOpponentGuess(nickname)
+            })
+        } catch (e) {
+            console.error(e)
+            throw new BondzioSocketCallbackError("Error while processing websocket requests")
+        }
+    }
+
+    public sendMessage(message: string){
+        this.io.emit("send-message", {
+            nickname: this.nickname,
+            content: message
+        })
+    }
+
+    public sendDraw(coords: DrawCoords) {
+        this.io.emit("send-draw", coords)
+    }
+
+    public guess(word: string) {
+        this.io.emit("guess", word)
+    }
+
+    public getNewWord(category: string){
+        this.io.emit("generate-new-word", category);
+    }
 }
-
-
 

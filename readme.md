@@ -39,12 +39,52 @@ Perform operation specified by ```food``` and return ```Room```:
 
 ```ts
 async function Bondzio.eat(food: BondzioFood): Promise<Room>   
+throws {
+    BondzioServerError,
+    
+}
 ```
 
 Return current state of Bondzio object:
 
 ```ts
 function Bondzio.state(): BondzioStatus
+```
+
+Connect to the websocket server as ```nickname```
+
+```ts
+function connect(nickname: string)
+```
+
+Setup custom callbacks to be execcuted on ws events
+
+```ts
+function socketSetup(callbacks: BondzioSocketCallbacks)
+```
+
+Send a chat message to the room
+
+```ts
+function sendMessage(message: string)
+```
+
+Send coordinates from drawing to the room
+
+```ts
+function sendDraw(coords: DrawCoords)
+```
+
+Send the player's guess
+
+```ts
+function guess(word: string)
+```
+
+Get a new clue to be guessed based on ```category```. Only to be called by the new drawing player
+
+```ts
+function getNewWord(category: string)
 ```
 
 #### Types
@@ -88,6 +128,61 @@ enum BondzioAction{
 ```
 
 An enum representing complex actions that can be scheduled for Bondzio to perform
+
+```ts  
+interface BondzioSocketCallbacks {
+    onConnect: (connectMessage: string) => void,
+    onRoomConfirm: (confirmMessage: string) => void,
+    onChatMessage: (chatMessage: Message) => void,
+    onDraw: (coords: DrawCoords) => void,
+    onCorrectGuess: () => void,
+    onOpponentGuess: (opponent: string) => void,
+    onNewWord: (word: string) => void
+}
+```  
+
+An object used for assigning custom callbacks to be executed on websocket events
+
+
+#### Errors
+
+```ts  
+class BondzioServerNotFoundError extends Error {}
+```
+
+An error indicating that Bondzio could no establish connection to the server
+
+```ts  
+class BondzioWrongPasswordError extends Error {}
+```
+
+An error indicating that user submitted wrong password while logging in
+
+```ts  
+class BondzioRoomNotFoundError extends Error {}
+```
+
+An error indicating that user submitted wrong roomId while logging in
+
+```ts  
+class BondzioServerError extends Error {}
+```
+
+An error indicating that internal server error occured
+
+```ts  
+class BondzioRoomAlreadyExistsError extends Error {}
+```
+
+An error indicating that registered room already exists
+
+```ts  
+class BondzioSocketError extends Error {}
+```
+
+An error indicating that an internal callback error occured or no callback has been provided
+
+
 
 ### Collaborate
 
