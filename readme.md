@@ -143,6 +143,16 @@ interface BondzioSocketCallbacks {
 
 An object used for assigning custom callbacks to be executed on websocket events
 
+```ts  
+interface DrawCoords {
+    prevX: number,
+    prevY: number,
+    x: number,
+    y: number
+}
+```  
+
+An object representing information about drawing
 
 #### Errors
 
