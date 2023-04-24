@@ -155,7 +155,8 @@ interface DrawData {
     prevY: number,
     x: number,
     y: number,
-    color: String
+    color: String,
+    strokeSize: number
 }
 ```  
 

@@ -34,7 +34,8 @@ export interface DrawData {
     prevY: number,
     x: number,
     y: number,
-    color: DrawData
+    color: String,
+    strokeSize: number
 }
 
 export interface BondzioSocketCallbacks {
