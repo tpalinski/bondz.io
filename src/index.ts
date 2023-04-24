@@ -1,7 +1,7 @@
 import { BondzioRoomAlreadyExistsError, BondzioRoomNotFoundError, BondzioServerError, BondzioServerNotFoundError, BondzioWrongPasswordError } from "./error";
 import { roomParser } from "./roomParser";
 import {io} from 'socket.io-client';
-import {BondzioFood, BondzioStatus, DrawCoords, BondzioAction, Room, Message, BondzioSocketCallbacks } from './types'
+import {BondzioFood, BondzioStatus, DrawData, BondzioAction, Room, Message, BondzioSocketCallbacks } from './types'
 import { BondzioSocketCallbackError } from "./error";
 // Types
 
@@ -176,7 +176,7 @@ export default class Bondzio {
                 callbacks.onChatMessage(msg)
             })
 
-            this.io.on("receive-draw", (msg: DrawCoords) => {
+            this.io.on("receive-draw", (msg: DrawData) => {
                 callbacks.onDraw(msg)
             })
 
@@ -204,7 +204,7 @@ export default class Bondzio {
         })
     }
 
-    public sendDraw(coords: DrawCoords) {
+    public sendDraw(coords: DrawData) {
         this.io.emit("send-draw", coords)
     }
 
