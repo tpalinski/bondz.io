@@ -140,7 +140,7 @@ interface BondzioSocketCallbacks {
     onConnect: (connectMessage: string) => void,
     onRoomConfirm: (confirmMessage: string) => void,
     onChatMessage: (chatMessage: Message) => void,
-    onDraw: (coords: DrawCoords) => void,
+    onDraw: (coords: DrawData) => void,
     onCorrectGuess: () => void,
     onOpponentGuess: (opponent: string) => void,
     onNewWord: (word: string) => void
@@ -150,11 +150,12 @@ interface BondzioSocketCallbacks {
 An object used for assigning custom callbacks to be executed on websocket events
 
 ```ts  
-interface DrawCoords {
+interface DrawData {
     prevX: number,
     prevY: number,
     x: number,
-    y: number
+    y: number,
+    color: String
 }
 ```  
 

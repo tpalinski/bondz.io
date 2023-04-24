@@ -29,18 +29,19 @@ export interface Message {
     content: string
 }
 
-export interface DrawCoords {
+export interface DrawData {
     prevX: number,
     prevY: number,
     x: number,
-    y: number
+    y: number,
+    color: DrawData
 }
 
 export interface BondzioSocketCallbacks {
     onConnect: (connectMessage: string) => void,
     onRoomConfirm: (confirmMessage: string) => void,
     onChatMessage: (chatMessage: Message) => void,
-    onDraw: (coords: DrawCoords) => void,
+    onDraw: (coords: DrawData) => void,
     onCorrectGuess: () => void,
     onOpponentGuess: (opponent: string) => void,
     onNewWord: (word: string) => void
