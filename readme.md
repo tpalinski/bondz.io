@@ -51,6 +51,12 @@ Return current state of Bondzio object:
 function Bondzio.state(): BondzioStatus
 ```
 
+Return the nickname of currently connected player
+
+```ts
+function owner() : String
+```
+
 Connect to the websocket server as ```nickname```
 
 ```ts
