@@ -30,6 +30,8 @@ export interface Message {
 }
 
 export interface DrawCoords {
+    prevX: number,
+    prevY: number,
     x: number,
     y: number
 }

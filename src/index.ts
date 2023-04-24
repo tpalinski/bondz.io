@@ -62,6 +62,10 @@ export default class Bondzio {
     public get state() : BondzioStatus {
         return this.status
     }
+
+    public get owner() : String {
+        return this.nickname
+    }
     
 
     private async login(): Promise<Room>{
